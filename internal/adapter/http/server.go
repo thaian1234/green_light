@@ -24,12 +24,19 @@ func NewAdapter(cfg *config.Config) *Adapter {
 
 	// services
 	healthSvc := services.NewHealthService(cfg)
+	movieSvc := services.NewMovieService()
 
 	// Handlers
 	healthHandler := handlers.NewHealthHandler(healthSvc)
+	movieHandler := handlers.NewMovieHandler(movieSvc)
 
 	// Routes
-	_, err := NewRoutes(router, cfg, healthHandler)
+	_, err := NewRoutes(
+		router,
+		cfg,
+		healthHandler,
+		movieHandler,
+	)
 
 	if err != nil {
 		logger.Fatal("failed to setup routes ", err)

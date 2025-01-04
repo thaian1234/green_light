@@ -14,7 +14,12 @@ type Routes struct {
 	cfg *config.Config
 }
 
-func NewRoutes(r *gin.Engine, cfg *config.Config, healthHandler *handlers.HealthHandler) (*Routes, error) {
+func NewRoutes(
+	r *gin.Engine,
+	cfg *config.Config,
+	healthHandler *handlers.HealthHandler,
+	movieHandler *handlers.MovieHandler,
+) (*Routes, error) {
 	if cfg.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -28,9 +33,15 @@ func NewRoutes(r *gin.Engine, cfg *config.Config, healthHandler *handlers.Health
 
 	v1 := r.Group("/v1/api")
 	{
+		// Health route
 		health := v1.Group("/health")
 		{
 			health.GET("/", healthHandler.Check)
+		}
+		// Movie route
+		movie := v1.Group("/movie")
+		{
+			movie.GET("/:id", movieHandler.ShowMovie)
 		}
 	}
 

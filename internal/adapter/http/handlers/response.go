@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/thaian1234/green_light/internal/adapter/logger"
 	"github.com/thaian1234/green_light/internal/core/util"
 )
 
@@ -36,6 +37,7 @@ func newErrorResponse(errMsgs []string) errorResponse {
 func validationError(ctx *gin.Context, err error) {
 	errMsgs := util.ParseError(err)
 	errRsp := newErrorResponse(errMsgs)
+	logger.Error("Validation Error", "error", errMsgs)
 	ctx.JSON(http.StatusUnprocessableEntity, errRsp)
 }
 
@@ -47,5 +49,6 @@ func handleSuccess(ctx *gin.Context, httpStatus int, data any) {
 func handleError(ctx *gin.Context, err error) {
 	errMsg := util.ParseError(err)
 	errResp := newErrorResponse(errMsg)
+	logger.Error("HandleError Failed", "error", err)
 	ctx.JSON(http.StatusBadRequest, errResp)
 }
