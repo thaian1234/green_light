@@ -1,2 +1,0 @@
-{"level":"INFO","ts":"2025-01-04T15:19:32.806+0700","caller":"http/server.go:47","msg":"Server is running"}
-{"level":"INFO","ts":"2025-01-04T15:32:21.894+0700","caller":"http/main.go:21","msg":"running"}
