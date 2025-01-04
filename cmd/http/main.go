@@ -5,7 +5,7 @@ import (
 
 	"github.com/thaian1234/green_light/config"
 	"github.com/thaian1234/green_light/internal/adapter/http"
-	"github.com/thaian1234/green_light/internal/adapter/logger"
+	"github.com/thaian1234/green_light/pkg/logger"
 )
 
 func main() {

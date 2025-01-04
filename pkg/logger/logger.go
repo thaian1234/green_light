@@ -68,7 +68,6 @@ func getLogWritter(cfg *config.Logger) zapcore.WriteSyncer {
 	return zapcore.AddSync(lumberJackLogger)
 }
 
-// Implement Logger interface methods
 func Debug(msg string, fields ...interface{}) {
 	GetLogger().logger.Debugw(msg, fields...)
 }

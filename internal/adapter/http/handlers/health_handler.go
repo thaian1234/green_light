@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/thaian1234/green_light/internal/core/ports"
+	"github.com/thaian1234/green_light/pkg/response"
 )
 
 type HealthHandler struct {
@@ -19,5 +18,12 @@ func NewHealthHandler(healSvc ports.HealthService) *HealthHandler {
 
 func (h *HealthHandler) Check(ctx *gin.Context) {
 	status := h.healthSvc.GetStatus()
-	handleSuccess(ctx, http.StatusOK, status)
+	resp := response.Envelope{
+		"status": status.Status,
+		"system_info": map[string]string{
+			"environment": status.Environment,
+			"version":     status.Version,
+		},
+	}
+	response.SendSuccess(ctx, resp)
 }

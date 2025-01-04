@@ -10,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/thaian1234/green_light/config"
 	"github.com/thaian1234/green_light/internal/adapter/http/handlers"
-	"github.com/thaian1234/green_light/internal/adapter/logger"
 	"github.com/thaian1234/green_light/internal/core/services"
+	"github.com/thaian1234/green_light/pkg/logger"
 )
 
 type Adapter struct {

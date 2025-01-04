@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/thaian1234/green_light/internal/core/ports"
+	"github.com/thaian1234/green_light/pkg/response"
 )
 
 type MovieHandler struct {
@@ -24,12 +23,14 @@ type getMovieRequest struct {
 func (h *MovieHandler) ShowMovie(ctx *gin.Context) {
 	var req getMovieRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
-		validationError(ctx, err)
+		response.SendValidationError(ctx, err)
 		return
 	}
 	movie, err := h.movieSvc.GetMovieByID(req.ID)
 	if err != nil {
-		handleError(ctx, err)
+		response.SendNotFound(ctx, err)
 	}
-	handleSuccess(ctx, http.StatusOK, movie)
+	response.SendSuccess(ctx, response.Envelope{
+		"movie": movie,
+	})
 }
