@@ -5,14 +5,14 @@ DB_DSN="postgres://${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable"
 DB_PATH="./internal/adapter/storages/postgres/migrations"
 
 migrate-up:
-	migrate -path "${DB_PATH}" -database "${DB_DSN}" up
+	migrate -path ${DB_PATH} -database ${DB_DSN} up
 
 migrate-down:
-	migrate -path "${DB_PATH}" -database "${DB_DSN}" down
+	migrate -path ${DB_PATH} -database ${DB_DSN} down
 
 migrate-create:
 	@read -p "Enter migration name: " name; \
-	migrate create -ext sql -dir "${DB_PATH}" -seq $$name
+	migrate create -ext sql -dir ${DB_PATH} -seq $$name
 
 # Run the application
 run:
