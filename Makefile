@@ -1,7 +1,7 @@
 include .env
 export
 
-DB_DSN="postgres://${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable"
+DB_DSN="postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable"
 DB_PATH="./internal/adapter/storages/postgres/migrations"
 
 migrate-up:
@@ -25,6 +25,10 @@ docker-up:
 # Stop and remove the Docker Compose services
 docker-down:
 	@docker-compose down
+
+# Clean up Docker resources
+docker-clean:
+	@docker-compose down -v --remove-orphans
 
 help:
 	@echo "  make run         - run application"

@@ -1,8 +1,19 @@
 package ports
 
-import "github.com/thaian1234/green_light/internal/core/domain"
+import (
+	"context"
+
+	"github.com/thaian1234/green_light/internal/core/domain"
+)
+
+type MovieRepository interface {
+	Insert(ctx context.Context, movie *domain.Movie) error
+	GetByID(ctx context.Context, id int64) (*domain.Movie, error)
+	Update(ctx context.Context, movie *domain.Movie) error
+	Delete(ctx context.Context, id int64) error
+}
 
 type MovieService interface {
-	CreateMovie(movie *domain.Movie) (*domain.Movie, error)
-	GetMovieByID(id int64) (*domain.Movie, error)
+	CreateMovie(ctx context.Context, movie *domain.Movie) (*domain.Movie, error)
+	GetMovieByID(ctx context.Context, id int64) (*domain.Movie, error)
 }

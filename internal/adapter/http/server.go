@@ -11,6 +11,7 @@ import (
 	"github.com/thaian1234/green_light/config"
 	"github.com/thaian1234/green_light/internal/adapter/http/handlers"
 	"github.com/thaian1234/green_light/internal/adapter/storages/postgres"
+	"github.com/thaian1234/green_light/internal/adapter/storages/postgres/repository"
 	"github.com/thaian1234/green_light/internal/core/services"
 	"github.com/thaian1234/green_light/pkg/logger"
 	"github.com/thaian1234/green_light/pkg/util"
@@ -29,9 +30,12 @@ func NewAdapter(cfg *config.Config, db *postgres.Adapter) *Adapter {
 	validator := util.NewValidator()
 	validator.SetupValidator()
 
+	// repositories
+	movieRepo := repository.NewMovieRepository(db.Pool)
+
 	// services
 	healthSvc := services.NewHealthService(cfg)
-	movieSvc := services.NewMovieService()
+	movieSvc := services.NewMovieService(movieRepo)
 
 	// Handlers
 	healthHandler := handlers.NewHealthHandler(healthSvc)

@@ -27,9 +27,10 @@ func (h *MovieHandler) ShowMovie(ctx *gin.Context) {
 		response.SendValidationError(ctx, err)
 		return
 	}
-	movie, err := h.movieSvc.GetMovieByID(req.ID)
+	movie, err := h.movieSvc.GetMovieByID(ctx, req.ID)
 	if err != nil {
 		response.SendNotFound(ctx, err)
+		return
 	}
 	response.SendSuccess(ctx, response.Envelope{
 		"movie": movie,
@@ -49,12 +50,16 @@ func (h *MovieHandler) CreateMovie(ctx *gin.Context) {
 		response.SendValidationError(ctx, err)
 		return
 	}
-
-	movie := domain.Movie{
+	movieModal := domain.Movie{
 		Title:   req.Title,
 		Year:    req.Year,
 		Runtime: domain.Runtime(req.Runtime),
 		Genres:  req.Genres,
 	}
-	response.SendCreatedSuccess(ctx, movie)
+	createdMovie, err := h.movieSvc.CreateMovie(ctx, &movieModal)
+	if err != nil {
+		response.SendBadRequest(ctx, err)
+		return
+	}
+	response.SendCreatedSuccess(ctx, createdMovie)
 }

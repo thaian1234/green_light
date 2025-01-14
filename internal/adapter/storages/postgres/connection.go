@@ -13,23 +13,25 @@ type Adapter struct {
 	*pgxpool.Pool
 }
 
-func NewAdapter(cfg *config.DB) (*Adapter, error) {
-	dsn := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s pool_max_conns=25 pool_max_conn_lifetime=1h30m pool_max_conn_idle_time=15m", cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name)
+func NewAdapter(ctx context.Context, cfg *config.DB) (*Adapter, error) {
+	dsn := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable", cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name)
 	dbConfig, err := pgxpool.ParseConfig(dsn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
 	if err != nil {
 		return nil, fmt.Errorf("error parsing config: %v", err)
 	}
-	pool, err := pgxpool.NewWithConfig(ctx, dbConfig)
+	pool, err := pgxpool.NewWithConfig(ctxWithTimeout, dbConfig)
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to database: %v", err)
 	}
-	if err := pool.Ping(ctx); err != nil {
+	if err := pool.Ping(ctxWithTimeout); err != nil {
 		return nil, fmt.Errorf("unable to ping database: %v", err)
 	}
 
-	return &Adapter{}, nil
+	return &Adapter{
+		Pool: pool,
+	}, nil
 }

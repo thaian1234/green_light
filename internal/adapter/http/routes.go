@@ -39,7 +39,7 @@ func NewRoutes(
 			health.GET("/", healthHandler.Check)
 		}
 		// Movie route
-		movie := v1.Group("/movie")
+		movie := v1.Group("/movie/")
 		{
 			movie.GET("/:id", movieHandler.ShowMovie)
 			movie.POST("/", movieHandler.CreateMovie)
