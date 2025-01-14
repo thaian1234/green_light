@@ -12,6 +12,7 @@ import (
 	"github.com/thaian1234/green_light/internal/adapter/http/handlers"
 	"github.com/thaian1234/green_light/internal/core/services"
 	"github.com/thaian1234/green_light/pkg/logger"
+	"github.com/thaian1234/green_light/pkg/util"
 )
 
 type Adapter struct {
@@ -21,6 +22,10 @@ type Adapter struct {
 
 func NewAdapter(cfg *config.Config) *Adapter {
 	router := gin.Default()
+
+	// Custom Validator
+	validator := util.NewValidator()
+	validator.SetupValidator()
 
 	// services
 	healthSvc := services.NewHealthService(cfg)

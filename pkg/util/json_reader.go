@@ -12,9 +12,10 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-var validate = validator.New()
+var validate *validator.Validate
 
 func ReadJSON(ctx *gin.Context, dst interface{}) error {
+	validate = validator.New()
 	maxBytes := 1_048_576
 	ctx.Request.Body = http.MaxBytesReader(nil, ctx.Request.Body, int64(maxBytes))
 
