@@ -5,6 +5,7 @@ import (
 
 	"github.com/thaian1234/green_light/config"
 	"github.com/thaian1234/green_light/internal/adapter/http"
+	"github.com/thaian1234/green_light/internal/adapter/storages/postgres"
 	"github.com/thaian1234/green_light/pkg/logger"
 )
 
@@ -18,6 +19,13 @@ func main() {
 		log.Fatalf("failed to load logger: %v", err)
 
 	}
-	httpAdapter := http.NewAdapter(cfg)
+
+	dbAdapter, err := postgres.NewAdapter(cfg.DB)
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	defer dbAdapter.Close()
+
+	httpAdapter := http.NewAdapter(cfg, dbAdapter)
 	httpAdapter.Run()
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/thaian1234/green_light/config"
 	"github.com/thaian1234/green_light/internal/adapter/http/handlers"
+	"github.com/thaian1234/green_light/internal/adapter/storages/postgres"
 	"github.com/thaian1234/green_light/internal/core/services"
 	"github.com/thaian1234/green_light/pkg/logger"
 	"github.com/thaian1234/green_light/pkg/util"
@@ -18,9 +19,10 @@ import (
 type Adapter struct {
 	cfg *config.Config
 	srv *http.Server
+	db  *postgres.Adapter
 }
 
-func NewAdapter(cfg *config.Config) *Adapter {
+func NewAdapter(cfg *config.Config, db *postgres.Adapter) *Adapter {
 	router := gin.Default()
 
 	// Custom Validator
@@ -58,6 +60,7 @@ func NewAdapter(cfg *config.Config) *Adapter {
 	return &Adapter{
 		cfg: cfg,
 		srv: srv,
+		db:  db,
 	}
 }
 
