@@ -24,5 +24,8 @@ go.work.sum
 # Log storages
 storages/*
 
+# temps
+tmp/*
+
 # env file
 .env
