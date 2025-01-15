@@ -32,3 +32,11 @@ func (s *MovieService) GetMovieByID(ctx context.Context, id int64) (*domain.Movi
 	}
 	return movie, nil
 }
+
+func (s *MovieService) GetAllMovie(ctx context.Context) ([]*domain.Movie, error) {
+	return s.movieRepo.GetAll(ctx)
+}
+
+func (s *MovieService) DeleteMovie(ctx context.Context, id int64) error {
+	return s.movieRepo.Delete(ctx, id)
+}

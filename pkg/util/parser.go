@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,6 +17,7 @@ func ParseError(err error) map[string]string {
 
 	var unmarshalTypeError *json.UnmarshalTypeError
 	var syntaxError *json.SyntaxError
+	var numError *strconv.NumError
 
 	switch {
 	case errors.As(err, &syntaxError):
@@ -25,6 +27,10 @@ func ParseError(err error) map[string]string {
 	case errors.As(err, &unmarshalTypeError):
 		fieldName := strings.ToLower(unmarshalTypeError.Field)
 		errorMessages[fieldName] = fmt.Sprintf("must be a %s value", unmarshalTypeError.Type)
+		return errorMessages
+	case errors.As(err, &numError):
+		fieldName := strings.ToLower(numError.Num)
+		errorMessages["parse"] = fmt.Sprintf("invalid number format: %s", fieldName)
 		return errorMessages
 	case errors.Is(err, io.EOF):
 		errorMessages["error"] = "request body is empty"

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/thaian1234/green_light/internal/core/domain"
 )
@@ -50,9 +51,46 @@ func (r *MovieRepository) GetByID(ctx context.Context, id int64) (*domain.Movie,
 		&movie.Version,
 	)
 	if err != nil {
-		return nil, err
+		if err == pgx.ErrNoRows {
+			return nil, domain.ErrDataNotFound
+		}
+		return nil, domain.ErrInternalServer
 	}
 	return &movie, nil
+}
+
+func (r *MovieRepository) GetAll(ctx context.Context) ([]*domain.Movie, error) {
+	query := `
+		SELECT id, created_at, title, year, runtime, genres, version
+		FROM movies
+		ORDER BY id
+	`
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		return nil, domain.ErrInternalServer
+	}
+	defer rows.Close()
+	movies := make([]*domain.Movie, 0)
+	for rows.Next() {
+		var movie domain.Movie
+		err := rows.Scan(
+			&movie.ID,
+			&movie.CreatedAt,
+			&movie.Title,
+			&movie.Year,
+			&movie.Runtime,
+			&movie.Genres,
+			&movie.Version,
+		)
+		if err != nil {
+			return nil, domain.ErrInternalServer
+		}
+		movies = append(movies, &movie)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, domain.ErrInternalServer
+	}
+	return movies, nil
 }
 
 func (r *MovieRepository) Update(ctx context.Context, movie *domain.Movie) error {
@@ -60,5 +98,15 @@ func (r *MovieRepository) Update(ctx context.Context, movie *domain.Movie) error
 }
 
 func (r *MovieRepository) Delete(ctx context.Context, id int64) error {
+	query := `
+		DELETE FROM movies WHERE id = $1
+	`
+	result, err := r.db.Exec(ctx, query, id)
+	if err != nil {
+		return domain.ErrInternalServer
+	}
+	if result.RowsAffected() == 0 {
+		return domain.ErrDataNotFound
+	}
 	return nil
 }

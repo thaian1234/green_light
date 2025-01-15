@@ -71,7 +71,7 @@ func SendCreatedSuccess(ctx *gin.Context, data any) {
 
 func SendDeletedSuccess(ctx *gin.Context) {
 	response := newResponse(Deleted, "Resource deleted successfully", nil)
-	ctx.JSON(http.StatusNoContent, response)
+	ctx.JSON(http.StatusOK, response)
 }
 
 func SendUpdatedSuccess(ctx *gin.Context) {

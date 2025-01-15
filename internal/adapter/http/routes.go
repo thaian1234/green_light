@@ -42,7 +42,9 @@ func NewRoutes(
 		movie := v1.Group("/movie/")
 		{
 			movie.GET("/:id", movieHandler.ShowMovie)
+			movie.GET("/", movieHandler.ListMovies)
 			movie.POST("/", movieHandler.CreateMovie)
+			movie.DELETE("/:id", movieHandler.DeleteMovie)
 		}
 	}
 
