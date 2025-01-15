@@ -18,7 +18,7 @@ func NewMovieHandler(movieSvc ports.MovieService) *MovieHandler {
 }
 
 type (
-	getMovieRequest struct {
+	params struct {
 		ID int64 `uri:"id" binding:"required,min=1,number"`
 	}
 	createMovieRequest struct {
@@ -27,10 +27,16 @@ type (
 		Runtime int32    `json:"runtime" binding:"required,number,min=1"`
 		Genres  []string `json:"genres" binding:"required"`
 	}
+	updateMovieRequest struct {
+		Title   *string  `json:"title" binding:"omitempty,required"`
+		Year    *int32   `json:"year" binding:"omitempty,required,year_range"`
+		Runtime *int32   `json:"runtime" binding:"omitempty,required"`
+		Genres  []string `json:"genres" binding:"omitempty,required"`
+	}
 )
 
 func (h *MovieHandler) ShowMovie(ctx *gin.Context) {
-	var req getMovieRequest
+	var req params
 	if err := ctx.ShouldBindUri(&req); err != nil {
 		response.SendValidationError(ctx, err)
 		return
@@ -76,8 +82,47 @@ func (h *MovieHandler) ListMovies(ctx *gin.Context) {
 	})
 }
 
+func (h *MovieHandler) UpdateMovie(ctx *gin.Context) {
+	var param params
+	if err := ctx.ShouldBindUri(&param); err != nil {
+		response.SendValidationError(ctx, err)
+		return
+	}
+
+	var reqBody updateMovieRequest
+	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
+		response.SendValidationError(ctx, err)
+		return
+	}
+	var movieModel domain.Movie
+	movieModel.ID = param.ID
+
+	if reqBody.Title != nil {
+		movieModel.Title = *reqBody.Title
+	}
+	if reqBody.Year != nil {
+		movieModel.Year = *reqBody.Year
+	}
+	if reqBody.Runtime != nil {
+		movieModel.Runtime = domain.Runtime(*reqBody.Runtime)
+	}
+	if reqBody.Genres != nil {
+		movieModel.Genres = reqBody.Genres
+	}
+
+	updatedMovie, err := h.movieSvc.UpdateMovie(ctx, &movieModel)
+	if err != nil {
+		response.SendBadRequest(ctx, err)
+		return
+	}
+
+	response.SendUpdatedSuccess(ctx, response.Envelope{
+		"movie": updatedMovie,
+	})
+}
+
 func (h *MovieHandler) DeleteMovie(ctx *gin.Context) {
-	var req getMovieRequest
+	var req params
 	if err := ctx.ShouldBindUri(&req); err != nil {
 		response.SendValidationError(ctx, err)
 		return

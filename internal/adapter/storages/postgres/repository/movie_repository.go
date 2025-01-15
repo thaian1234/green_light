@@ -5,7 +5,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/lib/pq"
 	"github.com/thaian1234/green_light/internal/core/domain"
+	"github.com/thaian1234/green_light/pkg/util"
 )
 
 type MovieRepository struct {
@@ -27,7 +29,7 @@ func (r *MovieRepository) Insert(ctx context.Context, movie *domain.Movie) error
 	args := []any{
 		movie.Title,
 		movie.Year,
-		movie.Runtime,
+		pq.Array(movie.Genres),
 		movie.Genres,
 	}
 
@@ -94,7 +96,24 @@ func (r *MovieRepository) GetAll(ctx context.Context) ([]*domain.Movie, error) {
 }
 
 func (r *MovieRepository) Update(ctx context.Context, movie *domain.Movie) error {
-	return nil
+	query := `
+        UPDATE movies
+        SET title = COALESCE($1, title),
+            year = COALESCE($2, year),
+            runtime = COALESCE($3, runtime),
+            genres = COALESCE($4, genres),
+            version = version + 1
+        WHERE id = $5 
+        RETURNING version
+    `
+	args := []any{
+		util.NullString(movie.Title),
+		util.NullUint64(uint64(movie.Year)),
+		util.NullUint64(uint64(movie.Runtime)),
+		pq.Array(movie.Genres),
+		movie.ID,
+	}
+	return r.db.QueryRow(ctx, query, args...).Scan(&movie.Version)
 }
 
 func (r *MovieRepository) Delete(ctx context.Context, id int64) error {

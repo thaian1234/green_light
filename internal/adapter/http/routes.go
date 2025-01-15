@@ -44,6 +44,7 @@ func NewRoutes(
 			movie.GET("/:id", movieHandler.ShowMovie)
 			movie.GET("/", movieHandler.ListMovies)
 			movie.POST("/", movieHandler.CreateMovie)
+			movie.PATCH("/:id", movieHandler.UpdateMovie)
 			movie.DELETE("/:id", movieHandler.DeleteMovie)
 		}
 	}

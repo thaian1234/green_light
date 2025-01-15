@@ -18,5 +18,6 @@ type MovieService interface {
 	CreateMovie(ctx context.Context, movie *domain.Movie) (*domain.Movie, error)
 	GetMovieByID(ctx context.Context, id int64) (*domain.Movie, error)
 	GetAllMovie(ctx context.Context) ([]*domain.Movie, error)
+	UpdateMovie(ctx context.Context, movie *domain.Movie) (*domain.Movie, error)
 	DeleteMovie(ctx context.Context, id int64) error
 }

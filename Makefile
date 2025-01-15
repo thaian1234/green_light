@@ -18,6 +18,9 @@ migrate-create:
 run:
 	go run cmd/http/main.go
 
+dev: 
+	air
+
 # Start the Docker Compose services
 docker-up:
 	@docker-compose up -d

@@ -37,6 +37,14 @@ func (s *MovieService) GetAllMovie(ctx context.Context) ([]*domain.Movie, error)
 	return s.movieRepo.GetAll(ctx)
 }
 
+func (s *MovieService) UpdateMovie(ctx context.Context, movie *domain.Movie) (*domain.Movie, error) {
+	err := s.movieRepo.Update(ctx, movie)
+	if err != nil {
+		return nil, err
+	}
+	return movie, nil
+}
+
 func (s *MovieService) DeleteMovie(ctx context.Context, id int64) error {
 	return s.movieRepo.Delete(ctx, id)
 }

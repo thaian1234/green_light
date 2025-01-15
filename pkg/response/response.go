@@ -74,8 +74,8 @@ func SendDeletedSuccess(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, response)
 }
 
-func SendUpdatedSuccess(ctx *gin.Context) {
-	response := newResponse(Updated, "Resource updated successfully", nil)
+func SendUpdatedSuccess(ctx *gin.Context, data any) {
+	response := newResponse(Updated, "Resource updated successfully", data)
 	ctx.JSON(http.StatusOK, response)
 }
 
