@@ -29,8 +29,8 @@ func (r *MovieRepository) Insert(ctx context.Context, movie *domain.Movie) error
 	args := []any{
 		movie.Title,
 		movie.Year,
+		movie.Runtime,
 		pq.Array(movie.Genres),
-		movie.Genres,
 	}
 
 	return r.db.QueryRow(ctx, query, args...).Scan(&movie.ID, &movie.CreatedAt, &movie.Version)

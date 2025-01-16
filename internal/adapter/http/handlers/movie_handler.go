@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/thaian1234/green_light/internal/core/domain"
 	"github.com/thaian1234/green_light/internal/core/ports"
-	"github.com/thaian1234/green_light/pkg/response"
 )
 
 type MovieHandler struct {
@@ -38,15 +37,15 @@ type (
 func (h *MovieHandler) ShowMovie(ctx *gin.Context) {
 	var req params
 	if err := ctx.ShouldBindUri(&req); err != nil {
-		response.SendValidationError(ctx, err)
+		HandleValidationError(ctx, err)
 		return
 	}
 	movie, err := h.movieSvc.GetMovieByID(ctx, req.ID)
 	if err != nil {
-		response.SendNotFound(ctx, err)
+		HandleError(ctx, err)
 		return
 	}
-	response.SendSuccess(ctx, response.Envelope{
+	SendSuccess(ctx, Envelope{
 		"movie": movie,
 	})
 }
@@ -54,7 +53,7 @@ func (h *MovieHandler) ShowMovie(ctx *gin.Context) {
 func (h *MovieHandler) CreateMovie(ctx *gin.Context) {
 	var req createMovieRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.SendValidationError(ctx, err)
+		HandleValidationError(ctx, err)
 		return
 	}
 	movieModal := domain.Movie{
@@ -65,19 +64,19 @@ func (h *MovieHandler) CreateMovie(ctx *gin.Context) {
 	}
 	createdMovie, err := h.movieSvc.CreateMovie(ctx, &movieModal)
 	if err != nil {
-		response.SendNotFound(ctx, err)
+		HandleError(ctx, err)
 		return
 	}
-	response.SendCreatedSuccess(ctx, createdMovie)
+	SendCreatedSuccess(ctx, createdMovie)
 }
 
 func (h *MovieHandler) ListMovies(ctx *gin.Context) {
 	movies, err := h.movieSvc.GetAllMovie(ctx)
 	if err != nil {
-		response.SendBadRequest(ctx, err)
+		HandleError(ctx, err)
 		return
 	}
-	response.SendSuccess(ctx, response.Envelope{
+	SendSuccess(ctx, Envelope{
 		"movies": movies,
 	})
 }
@@ -85,13 +84,13 @@ func (h *MovieHandler) ListMovies(ctx *gin.Context) {
 func (h *MovieHandler) UpdateMovie(ctx *gin.Context) {
 	var param params
 	if err := ctx.ShouldBindUri(&param); err != nil {
-		response.SendValidationError(ctx, err)
+		HandleValidationError(ctx, err)
 		return
 	}
 
 	var reqBody updateMovieRequest
 	if err := ctx.ShouldBindJSON(&reqBody); err != nil {
-		response.SendValidationError(ctx, err)
+		HandleValidationError(ctx, err)
 		return
 	}
 	var movieModel domain.Movie
@@ -112,11 +111,11 @@ func (h *MovieHandler) UpdateMovie(ctx *gin.Context) {
 
 	updatedMovie, err := h.movieSvc.UpdateMovie(ctx, &movieModel)
 	if err != nil {
-		response.SendBadRequest(ctx, err)
+		HandleError(ctx, err)
 		return
 	}
 
-	response.SendUpdatedSuccess(ctx, response.Envelope{
+	SendUpdatedSuccess(ctx, Envelope{
 		"movie": updatedMovie,
 	})
 }
@@ -124,13 +123,13 @@ func (h *MovieHandler) UpdateMovie(ctx *gin.Context) {
 func (h *MovieHandler) DeleteMovie(ctx *gin.Context) {
 	var req params
 	if err := ctx.ShouldBindUri(&req); err != nil {
-		response.SendValidationError(ctx, err)
+		HandleValidationError(ctx, err)
 		return
 	}
 	err := h.movieSvc.DeleteMovie(ctx, req.ID)
 	if err != nil {
-		response.SendNotFound(ctx, err)
+		HandleError(ctx, err)
 		return
 	}
-	response.SendDeletedSuccess(ctx)
+	SendDeletedSuccess(ctx)
 }
