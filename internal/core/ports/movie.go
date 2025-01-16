@@ -11,13 +11,13 @@ type MovieRepository interface {
 	GetByID(ctx context.Context, id int64) (*domain.Movie, error)
 	Update(ctx context.Context, movie *domain.Movie) error
 	Delete(ctx context.Context, id int64) error
-	GetAll(ctx context.Context) ([]*domain.Movie, error)
+	GetAll(ctx context.Context, title string, genres []string) ([]*domain.Movie, error)
 }
 
 type MovieService interface {
-	CreateMovie(ctx context.Context, movie *domain.Movie) (*domain.Movie, error)
+	CreateMovie(ctx context.Context, movie *domain.Movie) error
 	GetMovieByID(ctx context.Context, id int64) (*domain.Movie, error)
-	GetAllMovie(ctx context.Context) ([]*domain.Movie, error)
-	UpdateMovie(ctx context.Context, movie *domain.Movie) (*domain.Movie, error)
+	GetAllMovie(ctx context.Context, title string, genres []string) ([]*domain.Movie, error)
+	UpdateMovie(ctx context.Context, movie *domain.Movie) error
 	DeleteMovie(ctx context.Context, id int64) error
 }

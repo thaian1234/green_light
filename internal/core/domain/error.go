@@ -10,6 +10,7 @@ var (
 	ErrForbidden          = errors.New("user is forbidden to access the resource")
 	ErrorNotFound         = errors.New("not found")
 	ErrNoUpdatedData      = errors.New("no data to update")
+	ErrUpdateConflict     = errors.New("unable to update the record due to an edit conflict, please try again")
 	ErrConflictingData    = errors.New("data conflicts with existing data in unique column")
 	ErrTokenDuration      = errors.New("invalid token duration format")
 	ErrTokenCreation      = errors.New("error creating token")

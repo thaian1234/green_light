@@ -33,7 +33,19 @@ func (r *MovieRepository) Insert(ctx context.Context, movie *domain.Movie) error
 		pq.Array(movie.Genres),
 	}
 
-	return r.db.QueryRow(ctx, query, args...).Scan(&movie.ID, &movie.CreatedAt, &movie.Version)
+	err := r.db.QueryRow(ctx, query, args...).Scan(&movie.ID, &movie.CreatedAt, &movie.Version)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "unique_violation":
+				return domain.ErrConflictingData
+			case "foreign_key_violation":
+				return domain.ErrDataNotFound
+			}
+		}
+		return domain.ErrInternalServer
+	}
+	return nil
 }
 
 func (r *MovieRepository) GetByID(ctx context.Context, id int64) (*domain.Movie, error) {
@@ -61,10 +73,12 @@ func (r *MovieRepository) GetByID(ctx context.Context, id int64) (*domain.Movie,
 	return &movie, nil
 }
 
-func (r *MovieRepository) GetAll(ctx context.Context) ([]*domain.Movie, error) {
+func (r *MovieRepository) GetAll(ctx context.Context, title string, genres []string) ([]*domain.Movie, error) {
 	query := `
 		SELECT id, created_at, title, year, runtime, genres, version
 		FROM movies
+		WHERE (LOWER(title) = $1 OR $1 = '')
+		AND (genres @> $2 OR $2 = '{}')
 		ORDER BY id
 	`
 	rows, err := r.db.Query(ctx, query)
@@ -103,7 +117,7 @@ func (r *MovieRepository) Update(ctx context.Context, movie *domain.Movie) error
             runtime = COALESCE($3, runtime),
             genres = COALESCE($4, genres),
             version = version + 1
-        WHERE id = $5 
+        WHERE id = $5 and version = $6
         RETURNING version
     `
 	args := []any{
@@ -112,8 +126,16 @@ func (r *MovieRepository) Update(ctx context.Context, movie *domain.Movie) error
 		util.NullUint64(uint64(movie.Runtime)),
 		pq.Array(movie.Genres),
 		movie.ID,
+		movie.Version,
 	}
-	return r.db.QueryRow(ctx, query, args...).Scan(&movie.Version)
+	err := r.db.QueryRow(ctx, query, args...).Scan(&movie.Version)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return domain.ErrUpdateConflict
+		}
+		return domain.ErrInternalServer
+	}
+	return nil
 }
 
 func (r *MovieRepository) Delete(ctx context.Context, id int64) error {

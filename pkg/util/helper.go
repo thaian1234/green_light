@@ -2,6 +2,7 @@ package util
 
 import (
 	"database/sql"
+	"strings"
 )
 
 // nullString converts a string to sql.NullString for empty string check
@@ -66,4 +67,28 @@ func NullFloat64(value float64) sql.NullFloat64 {
 		Float64: value,
 		Valid:   true,
 	}
+}
+
+// The readCSV() helper reads a string value from the query string and then splits it
+// into a slice on the comma character. If no matching key could be found, it returns
+// the provided default value.
+func ReadCSV(values string, defaultValue []string) []string {
+	if values == "" {
+		return defaultValue
+	}
+	return strings.Split(values, ",")
+}
+
+func ReadInt(value int, defaultValue int) int {
+	if value == 0 {
+		return defaultValue
+	}
+	return defaultValue
+}
+
+func ReadSort(value string, defaultValue string) string {
+	if value == "" {
+		return defaultValue
+	}
+	return defaultValue
 }

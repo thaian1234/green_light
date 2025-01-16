@@ -17,12 +17,8 @@ func NewMovieService(movieRepo ports.MovieRepository) *MovieService {
 	}
 }
 
-func (s *MovieService) CreateMovie(ctx context.Context, movie *domain.Movie) (*domain.Movie, error) {
-	err := s.movieRepo.Insert(ctx, movie)
-	if err != nil {
-		return nil, err
-	}
-	return movie, nil
+func (s *MovieService) CreateMovie(ctx context.Context, movie *domain.Movie) error {
+	return s.movieRepo.Insert(ctx, movie)
 }
 
 func (s *MovieService) GetMovieByID(ctx context.Context, id int64) (*domain.Movie, error) {
@@ -33,16 +29,12 @@ func (s *MovieService) GetMovieByID(ctx context.Context, id int64) (*domain.Movi
 	return movie, nil
 }
 
-func (s *MovieService) GetAllMovie(ctx context.Context) ([]*domain.Movie, error) {
-	return s.movieRepo.GetAll(ctx)
+func (s *MovieService) GetAllMovie(ctx context.Context, title string, genres []string) ([]*domain.Movie, error) {
+	return s.movieRepo.GetAll(ctx, title, genres)
 }
 
-func (s *MovieService) UpdateMovie(ctx context.Context, movie *domain.Movie) (*domain.Movie, error) {
-	err := s.movieRepo.Update(ctx, movie)
-	if err != nil {
-		return nil, err
-	}
-	return movie, nil
+func (s *MovieService) UpdateMovie(ctx context.Context, movie *domain.Movie) error {
+	return s.movieRepo.Update(ctx, movie)
 }
 
 func (s *MovieService) DeleteMovie(ctx context.Context, id int64) error {

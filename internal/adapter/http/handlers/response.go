@@ -33,19 +33,7 @@ var errorStatusMap = map[error]int{
 	domain.ErrForbidden:          http.StatusForbidden,
 	domain.ErrNoUpdatedData:      http.StatusBadRequest,
 	domain.ErrorValidation:       http.StatusUnprocessableEntity,
-}
-
-var errorStatusMsg = map[error]string{
-	domain.ErrInternalServer:     "Internal Server Error",
-	domain.ErrDataNotFound:       "Data Not Found",
-	domain.ErrConflictingData:    "Conflicting Data",
-	domain.ErrInvalidCredentials: "Invalid Credentials",
-	domain.ErrUnauthorized:       "Unauthorized",
-	domain.ErrInvalidToken:       "Invalid Token",
-	domain.ErrExpiredToken:       "Token Expired",
-	domain.ErrForbidden:          "Forbidden",
-	domain.ErrNoUpdatedData:      "No Updated Data",
-	domain.ErrorValidation:       "Validation Error",
+	domain.ErrConflictingData:    http.StatusConflict,
 }
 
 func newResponse(message string, data any) Response {
@@ -66,31 +54,30 @@ func newErrorResponse(message string, err any) ErrorResponse {
 
 func HandleValidationError(ctx *gin.Context, err error) {
 	errMsg := util.ParseError(err)
-	statusMsg := errorStatusMsg[domain.ErrorValidation]
-	errRsp := newErrorResponse(statusMsg, errMsg)
-	ctx.JSON(http.StatusBadRequest, errRsp)
+	errRsp := newErrorResponse("validation error", errMsg)
+	ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, errRsp)
 }
 
 func HandleError(ctx *gin.Context, err error) {
 	errMsg := util.ParseError(err)
-	statusMsg := errorStatusMsg[err]
-
+	msg := err.Error()
 	statusCode, ok := errorStatusMap[err]
 	if !ok {
 		statusCode = http.StatusInternalServerError
+		msg = "Internal server error"
 	}
-	errResponse := newErrorResponse(statusMsg, errMsg)
+	errResponse := newErrorResponse(msg, errMsg)
 	ctx.JSON(statusCode, errResponse)
 }
 
 func HandleAbort(ctx *gin.Context, err error) {
 	statusCode, ok := errorStatusMap[err]
-	statusMsg := errorStatusMsg[err]
-
+	msg := err.Error()
 	if !ok {
 		statusCode = http.StatusInternalServerError
+		msg = "Internal server error"
 	}
-	errResponse := newErrorResponse(statusMsg, err)
+	errResponse := newErrorResponse(msg, err)
 	ctx.AbortWithStatusJSON(statusCode, errResponse)
 }
 

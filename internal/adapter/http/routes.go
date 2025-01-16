@@ -1,6 +1,7 @@
 package http
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/gin-contrib/cors"
@@ -30,6 +31,12 @@ func NewRoutes(
 	ginConfig.AllowOrigins = originsList
 
 	r.Use(cors.New(ginConfig))
+	r.NoRoute(gin.HandlerFunc(func(c *gin.Context) {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Not found"})
+	}))
+	r.NoMethod(gin.HandlerFunc(func(c *gin.Context) {
+		c.JSON(http.StatusMethodNotAllowed, gin.H{"message": "Method not allowed"})
+	}))
 
 	v1 := r.Group("/v1/api")
 	{

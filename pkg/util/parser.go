@@ -55,6 +55,12 @@ func ParseError(err error) map[string]string {
 				errorMessages[field] = fmt.Sprintf("%s must have maximum length of %s", field, e.Param())
 			case "unique":
 				errorMessages[field] = fmt.Sprintf("%s must contain unique values", field)
+			case "page":
+				errorMessages[field] = fmt.Sprintf("%s must be between 1 and 100", field)
+			case "size":
+				errorMessages[field] = fmt.Sprintf("%s must be between 1 and 10 million", field)
+			case "sort":
+				errorMessages[field] = "invalid sort value"
 			default:
 				errorMessages[field] = fmt.Sprintf("invalid value for %s", field)
 			}

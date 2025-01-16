@@ -20,6 +20,11 @@ type (
 	params struct {
 		ID int64 `uri:"id" binding:"required,min=1,number"`
 	}
+	listMovieRequest struct {
+		Title  string `form:"title"`
+		Genres string `form:"genres"`
+		domain.Filter
+	}
 	createMovieRequest struct {
 		Title   string   `json:"title" binding:"required"`
 		Year    int32    `json:"year" binding:"required,year_range"`
@@ -62,20 +67,35 @@ func (h *MovieHandler) CreateMovie(ctx *gin.Context) {
 		Runtime: domain.Runtime(req.Runtime),
 		Genres:  req.Genres,
 	}
-	createdMovie, err := h.movieSvc.CreateMovie(ctx, &movieModal)
+	err := h.movieSvc.CreateMovie(ctx, &movieModal)
 	if err != nil {
 		HandleError(ctx, err)
 		return
 	}
-	SendCreatedSuccess(ctx, createdMovie)
+	SendCreatedSuccess(ctx, movieModal)
 }
 
 func (h *MovieHandler) ListMovies(ctx *gin.Context) {
-	movies, err := h.movieSvc.GetAllMovie(ctx)
+	var queryParams listMovieRequest
+	queryParams.SortSafeList = []string{"id", "-id", "title", "-title", "year", "-year", "runtime", "-runtime", "genres", "-genres"}
+	if err := ctx.ShouldBindQuery(&queryParams); err != nil {
+		HandleValidationError(ctx, err)
+		return
+	}
+
+	genres := ctx.QueryArray("genres")
+	// filter := domain.Filter{
+	// 	Page: util.ReadInt(queryParams.Page, 1),
+	// 	Size: util.ReadInt(queryParams.Size, 10),
+	// 	Sort: queryParams.Sort,
+	// }
+
+	movies, err := h.movieSvc.GetAllMovie(ctx, queryParams.Title, genres)
 	if err != nil {
 		HandleError(ctx, err)
 		return
 	}
+
 	SendSuccess(ctx, Envelope{
 		"movies": movies,
 	})
@@ -93,30 +113,33 @@ func (h *MovieHandler) UpdateMovie(ctx *gin.Context) {
 		HandleValidationError(ctx, err)
 		return
 	}
-	var movieModel domain.Movie
-	movieModel.ID = param.ID
 
+	existingMovie, err := h.movieSvc.GetMovieByID(ctx, param.ID)
+	if err != nil {
+		HandleError(ctx, err)
+		return
+	}
 	if reqBody.Title != nil {
-		movieModel.Title = *reqBody.Title
+		existingMovie.Title = *reqBody.Title
 	}
 	if reqBody.Year != nil {
-		movieModel.Year = *reqBody.Year
+		existingMovie.Year = *reqBody.Year
 	}
 	if reqBody.Runtime != nil {
-		movieModel.Runtime = domain.Runtime(*reqBody.Runtime)
+		existingMovie.Runtime = domain.Runtime(*reqBody.Runtime)
 	}
 	if reqBody.Genres != nil {
-		movieModel.Genres = reqBody.Genres
+		existingMovie.Genres = reqBody.Genres
 	}
 
-	updatedMovie, err := h.movieSvc.UpdateMovie(ctx, &movieModel)
+	err = h.movieSvc.UpdateMovie(ctx, existingMovie)
 	if err != nil {
 		HandleError(ctx, err)
 		return
 	}
 
 	SendUpdatedSuccess(ctx, Envelope{
-		"movie": updatedMovie,
+		"movie": existingMovie,
 	})
 }
 
