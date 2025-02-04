@@ -75,9 +75,9 @@ func (r *MovieRepository) GetByID(ctx context.Context, id int64) (*domain.Movie,
 	return &movie, nil
 }
 
-func (r *MovieRepository) GetAll(ctx context.Context, title string, genres []string, filter domain.Filter) ([]*domain.Movie, error) {
+func (r *MovieRepository) GetAll(ctx context.Context, title string, genres []string, filter domain.Filter) ([]*domain.Movie, domain.Metadata, error) {
 	query := fmt.Sprintf(`
-		SELECT id, created_at, title, year, runtime, genres, version
+		SELECT count(*) OVER(), id, created_at, title, year, runtime, genres, version
 		FROM movies
 		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (genres @> $2 OR $2 = '{}')
@@ -92,13 +92,16 @@ func (r *MovieRepository) GetAll(ctx context.Context, title string, genres []str
 
 	rows, err := r.db.Query(ctx, query, args...)
 	if err != nil {
-		return nil, domain.ErrInternalServer
+		return nil, domain.Metadata{}, domain.ErrInternalServer
 	}
 	defer rows.Close()
+
+	totalRecords := 0
 	movies := make([]*domain.Movie, 0)
 	for rows.Next() {
 		var movie domain.Movie
 		err := rows.Scan(
+			&totalRecords,
 			&movie.ID,
 			&movie.CreatedAt,
 			&movie.Title,
@@ -108,14 +111,16 @@ func (r *MovieRepository) GetAll(ctx context.Context, title string, genres []str
 			&movie.Version,
 		)
 		if err != nil {
-			return nil, domain.ErrInternalServer
+			return nil, domain.Metadata{}, domain.ErrInternalServer
 		}
 		movies = append(movies, &movie)
 	}
+
 	if err := rows.Err(); err != nil {
-		return nil, domain.ErrInternalServer
+		return nil, domain.Metadata{}, domain.ErrInternalServer
 	}
-	return movies, nil
+	metadata := domain.CalculateMetadata(totalRecords, filter.Page, filter.Size)
+	return movies, metadata, nil
 }
 
 func (r *MovieRepository) Update(ctx context.Context, movie *domain.Movie) error {

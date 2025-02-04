@@ -87,19 +87,20 @@ func (h *MovieHandler) ListMovies(ctx *gin.Context) {
 	title := ctx.DefaultQuery("title", "")
 	filter := domain.Filter{
 		Page:         util.ReadInt(queryParams.Page, 1),
-		Size:         util.ReadInt(queryParams.Size, 20),
+		Size:         util.ReadInt(queryParams.Size, 10),
 		Sort:         ctx.DefaultQuery("sort", "id"),
 		SortSafeList: queryParams.SortSafeList,
 	}
 
-	movies, err := h.movieSvc.GetAllMovie(ctx, title, genres, filter)
+	movies, metadata, err := h.movieSvc.GetAllMovie(ctx, title, genres, filter)
 	if err != nil {
 		HandleError(ctx, err)
 		return
 	}
 
 	SendSuccess(ctx, Envelope{
-		"movies": movies,
+		"movies":   movies,
+		"metadata": metadata,
 	})
 }
 
