@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/thaian1234/green_light/internal/core/domain"
 	"github.com/thaian1234/green_light/internal/core/ports"
+	"github.com/thaian1234/green_light/pkg/util"
 )
 
 type MovieHandler struct {
@@ -83,14 +84,15 @@ func (h *MovieHandler) ListMovies(ctx *gin.Context) {
 		return
 	}
 
-	genres := ctx.QueryArray("genres")
-	// filter := domain.Filter{
-	// 	Page: util.ReadInt(queryParams.Page, 1),
-	// 	Size: util.ReadInt(queryParams.Size, 10),
-	// 	Sort: queryParams.Sort,
-	// }
+	genres := util.ReadCSV(queryParams.Genres, []string{})
+	title := ctx.DefaultQuery("title", "")
+	filter := domain.Filter{
+		Page: util.ReadInt(queryParams.Page, 1),
+		Size: util.ReadInt(queryParams.Size, 20),
+		Sort: ctx.DefaultQuery("sort", "id"),
+	}
 
-	movies, err := h.movieSvc.GetAllMovie(ctx, queryParams.Title, genres)
+	movies, err := h.movieSvc.GetAllMovie(ctx, title, genres, filter)
 	if err != nil {
 		HandleError(ctx, err)
 		return

@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -73,15 +75,19 @@ func (r *MovieRepository) GetByID(ctx context.Context, id int64) (*domain.Movie,
 	return &movie, nil
 }
 
-func (r *MovieRepository) GetAll(ctx context.Context, title string, genres []string) ([]*domain.Movie, error) {
-	query := `
+func (r *MovieRepository) GetAll(ctx context.Context, title string, genres []string, filter domain.Filter) ([]*domain.Movie, error) {
+	query := fmt.Sprintf(`
 		SELECT id, created_at, title, year, runtime, genres, version
 		FROM movies
-		WHERE (LOWER(title) = $1 OR $1 = '')
+		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (genres @> $2 OR $2 = '{}')
-		ORDER BY id
-	`
-	rows, err := r.db.Query(ctx, query)
+		ORDER BY %s %s, id ASC`, filter.SortColumn(), filter.SortDirection())
+	args := []any{
+		strings.TrimSpace(strings.ToLower(title)),
+		pq.Array(genres),
+	}
+
+	rows, err := r.db.Query(ctx, query, args...)
 	if err != nil {
 		return nil, domain.ErrInternalServer
 	}
