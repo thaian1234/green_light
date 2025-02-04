@@ -81,10 +81,13 @@ func (r *MovieRepository) GetAll(ctx context.Context, title string, genres []str
 		FROM movies
 		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (genres @> $2 OR $2 = '{}')
-		ORDER BY %s %s, id ASC`, filter.SortColumn(), filter.SortDirection())
+		ORDER BY %s %s, id ASC
+		LIMIT $3 OFFSET $4`, filter.SortColumn(), filter.SortDirection())
 	args := []any{
 		strings.TrimSpace(strings.ToLower(title)),
 		pq.Array(genres),
+		filter.Limit(),
+		filter.Offset(),
 	}
 
 	rows, err := r.db.Query(ctx, query, args...)

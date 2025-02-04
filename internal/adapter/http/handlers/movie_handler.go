@@ -83,13 +83,13 @@ func (h *MovieHandler) ListMovies(ctx *gin.Context) {
 		HandleValidationError(ctx, err)
 		return
 	}
-
 	genres := util.ReadCSV(queryParams.Genres, []string{})
 	title := ctx.DefaultQuery("title", "")
 	filter := domain.Filter{
-		Page: util.ReadInt(queryParams.Page, 1),
-		Size: util.ReadInt(queryParams.Size, 20),
-		Sort: ctx.DefaultQuery("sort", "id"),
+		Page:         util.ReadInt(queryParams.Page, 1),
+		Size:         util.ReadInt(queryParams.Size, 20),
+		Sort:         ctx.DefaultQuery("sort", "id"),
+		SortSafeList: queryParams.SortSafeList,
 	}
 
 	movies, err := h.movieSvc.GetAllMovie(ctx, title, genres, filter)
