@@ -30,5 +30,19 @@ func main() {
 	defer dbAdapter.Close()
 
 	httpAdapter := http.NewAdapter(cfg, dbAdapter)
-	httpAdapter.Run()
+	// Create a channel to listen for errors
+	errChan := make(chan error)
+
+	go func() {
+		errChan <- httpAdapter.Run()
+	}()
+
+	// Wait for server error or interrupt signal
+	select {
+	case err := <-errChan:
+		log.Printf("Server error: %v", err)
+	case <-ctx.Done():
+		log.Println("Shutting down server...")
+		httpAdapter.Stop(ctx)
+	}
 }

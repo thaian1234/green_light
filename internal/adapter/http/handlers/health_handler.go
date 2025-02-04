@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/thaian1234/green_light/internal/core/ports"
 )
@@ -24,5 +26,6 @@ func (h *HealthHandler) Check(ctx *gin.Context) {
 			"version":     status.Version,
 		},
 	}
+	time.Sleep(4 * time.Second)
 	SendSuccess(ctx, resp)
 }

@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"net"
+	"net/http"
 	"sync"
 	"time"
 
@@ -39,7 +40,7 @@ func RateLimit(cfg *config.Limiter) gin.HandlerFunc {
 		if cfg.Enabled {
 			ip, _, err := net.SplitHostPort(c.Request.RemoteAddr)
 			if err != nil {
-				c.AbortWithStatus(500)
+				c.AbortWithStatus(http.StatusInternalServerError)
 				return
 			}
 			// Lock the mutex to prevent this code from being executed concurrently.
@@ -53,10 +54,10 @@ func RateLimit(cfg *config.Limiter) gin.HandlerFunc {
 
 			if !clients[ip].limiter.Allow() {
 				mu.Unlock()
-				c.AbortWithStatus(429)
+				c.AbortWithStatus(http.StatusTooManyRequests)
 				return
 			}
-			// Very importantly, unlock the mutex before calling the next handler in the
+			// Very importantly, unlock the mutex before calling the next handler in thes
 			// chain. Notice that we DON'T use defer to unlock the mutex, as that would mean
 			// that the mutex isn't unlocked until all the handlers downstream of this
 			// middleware have also returned.

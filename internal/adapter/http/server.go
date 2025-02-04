@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -72,12 +75,30 @@ func NewAdapter(cfg *config.Config, db *postgres.Adapter) *Adapter {
 	}
 }
 
-func (a *Adapter) Run() {
-	log.Printf("Server is running on port::%s", a.cfg.HTTP.Port)
-	if err := a.srv.ListenAndServe(); err != nil {
-		msg := fmt.Sprintf("failed to run Server on port::%s", a.cfg.HTTP.Port)
-		logger.Fatal(msg, err)
-	}
+func (a *Adapter) Run() error {
+	// Start server in a goroutine
+	go func() {
+		log.Printf("Server is running on port::%s", a.cfg.HTTP.Port)
+		if err := a.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			msg := fmt.Sprintf("failed to run Server on port::%s", a.cfg.HTTP.Port)
+			logger.Fatal(msg, err)
+		}
+	}()
+
+	// Graceful shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	// Wait for interrupt signal
+	sig := <-quit
+	logger.Info("Received shutdown signal", "signal", sig.String())
+
+	// Create shutdown context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Attempt graceful shutdown
+	return a.srv.Shutdown(ctx)
 }
 
 func (a *Adapter) Stop(ctx context.Context) {
