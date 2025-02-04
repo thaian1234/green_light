@@ -10,12 +10,13 @@ import (
 // Config contains environment variables for the application, database, cache, token, logger and http server
 type (
 	Config struct {
-		App    *App
-		Token  *Token
-		Redis  *Redis
-		DB     *DB
-		HTTP   *HTTP
-		Logger *Logger
+		App     *App
+		Token   *Token
+		Redis   *Redis
+		DB      *DB
+		HTTP    *HTTP
+		Logger  *Logger
+		Limiter *Limiter
 	}
 	// App contains all the environment variables for the application
 	App struct {
@@ -56,6 +57,12 @@ type (
 		LogBackUps  int
 		LogMaxAge   int
 		LogCompress bool
+	}
+	// Limiter configuration
+	Limiter struct {
+		Rps     int
+		Burst   int
+		Enabled bool
 	}
 )
 
@@ -113,6 +120,15 @@ func Load() (*Config, error) {
 		LogCompress: logCompress,
 	}
 
+	rps, _ := strconv.Atoi(os.Getenv("LIMITER_RPS"))
+	burst, _ := strconv.Atoi(os.Getenv("LIMITER_BURST"))
+	enabled, _ := strconv.ParseBool(os.Getenv("LIMITER_ENABLED"))
+	limiter := &Limiter{
+		Rps:     rps,
+		Burst:   burst,
+		Enabled: enabled,
+	}
+
 	return &Config{
 		app,
 		token,
@@ -120,5 +136,6 @@ func Load() (*Config, error) {
 		db,
 		http,
 		logger,
+		limiter,
 	}, nil
 }

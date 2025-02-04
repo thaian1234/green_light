@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/thaian1234/green_light/config"
 	"github.com/thaian1234/green_light/internal/adapter/http/handlers"
+	"github.com/thaian1234/green_light/internal/adapter/http/middlewares"
 	"github.com/thaian1234/green_light/internal/adapter/storages/postgres"
 	"github.com/thaian1234/green_light/internal/adapter/storages/postgres/repository"
 	"github.com/thaian1234/green_light/internal/core/services"
@@ -25,6 +26,9 @@ type Adapter struct {
 
 func NewAdapter(cfg *config.Config, db *postgres.Adapter) *Adapter {
 	router := gin.Default()
+
+	// Middlewares
+	router.Use(middlewares.RateLimit(cfg.Limiter))
 
 	// Custom Validator
 	validator := util.NewValidator()
