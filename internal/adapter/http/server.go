@@ -75,7 +75,7 @@ func NewAdapter(cfg *config.Config, db *postgres.Adapter) *Adapter {
 	}
 }
 
-func (a *Adapter) Run() error {
+func (a *Adapter) Run(ctx context.Context) error {
 	// Start server in a goroutine
 	go func() {
 		log.Printf("Server is running on port::%s", a.cfg.HTTP.Port)
@@ -94,11 +94,11 @@ func (a *Adapter) Run() error {
 	logger.Info("Received shutdown signal", "signal", sig.String())
 
 	// Create shutdown context with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	// Attempt graceful shutdown
-	return a.srv.Shutdown(ctx)
+	return a.srv.Shutdown(ctxWithTimeout)
 }
 
 func (a *Adapter) Stop(ctx context.Context) {

@@ -34,7 +34,7 @@ func main() {
 	errChan := make(chan error)
 
 	go func() {
-		errChan <- httpAdapter.Run()
+		errChan <- httpAdapter.Run(ctx)
 	}()
 
 	// Wait for server error or interrupt signal

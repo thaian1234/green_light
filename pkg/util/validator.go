@@ -14,7 +14,6 @@ type Validator struct {
 
 func NewValidator() *Validator {
 	v, _ := binding.Validator.Engine().(*validator.Validate)
-
 	return &Validator{
 		validate: v,
 	}
