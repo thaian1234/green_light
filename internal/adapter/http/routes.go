@@ -20,6 +20,7 @@ func NewRoutes(
 	cfg *config.Config,
 	healthHandler *handlers.HealthHandler,
 	movieHandler *handlers.MovieHandler,
+	userHandler *handlers.UserHandler,
 ) (*Routes, error) {
 	if cfg.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
@@ -46,13 +47,18 @@ func NewRoutes(
 			health.GET("/", healthHandler.Check)
 		}
 		// Movie route
-		movie := v1.Group("/movie/")
+		movie := v1.Group("/movies")
 		{
 			movie.GET("/:id", movieHandler.ShowMovie)
 			movie.GET("/", movieHandler.ListMovies)
 			movie.POST("/", movieHandler.CreateMovie)
 			movie.PATCH("/:id", movieHandler.UpdateMovie)
 			movie.DELETE("/:id", movieHandler.DeleteMovie)
+		}
+		// User route
+		user := v1.Group("/users")
+		{
+			user.POST("/register", userHandler.RegisterUser)
 		}
 	}
 

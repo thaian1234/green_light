@@ -17,4 +17,5 @@ var (
 	ErrExpiredToken       = errors.New("access token has expired")
 	ErrInvalidToken       = errors.New("access token is invalid")
 	ErrInvalidCredentials = errors.New("invalid email or password")
+	ErrDuplicatedEmail    = errors.New("email already exists")
 )

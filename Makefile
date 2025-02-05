@@ -26,6 +26,12 @@ migrate-force:
 	@read -p "Enter the version: " version; \
 	migrate -path ${DB_PATH} -database ${DB_DSN} force $$version
 
+migrate-version:
+	migrate -path ${DB_PATH} -database ${DB_DSN} version
+
+migrate-drop:
+	migrate -path ${DB_PATH} -database ${DB_DSN} drop -f
+
 # Run the application
 run:
 	go run cmd/http/main.go

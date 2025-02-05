@@ -39,14 +39,17 @@ func NewAdapter(cfg *config.Config, db *postgres.Adapter) *Adapter {
 
 	// repositories
 	movieRepo := repository.NewMovieRepository(db.Pool)
+	userRepo := repository.NewUserRepository(db.Pool)
 
 	// services
 	healthSvc := services.NewHealthService(cfg)
 	movieSvc := services.NewMovieService(movieRepo)
+	userSvc := services.NewUserService(userRepo)
 
 	// Handlers
 	healthHandler := handlers.NewHealthHandler(healthSvc)
 	movieHandler := handlers.NewMovieHandler(movieSvc)
+	userHandler := handlers.NewUserHandler(userSvc)
 
 	// Routes
 	_, err := NewRoutes(
@@ -54,6 +57,7 @@ func NewAdapter(cfg *config.Config, db *postgres.Adapter) *Adapter {
 		cfg,
 		healthHandler,
 		movieHandler,
+		userHandler,
 	)
 
 	if err != nil {

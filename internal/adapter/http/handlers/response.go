@@ -34,6 +34,7 @@ var errorStatusMap = map[error]int{
 	domain.ErrNoUpdatedData:      http.StatusBadRequest,
 	domain.ErrorValidation:       http.StatusUnprocessableEntity,
 	domain.ErrConflictingData:    http.StatusConflict,
+	domain.ErrDuplicatedEmail:    http.StatusConflict,
 }
 
 func newResponse(message string, data any) Response {
@@ -60,7 +61,7 @@ func HandleValidationError(ctx *gin.Context, err error) {
 
 func HandleError(ctx *gin.Context, err error) {
 	errMsg := util.ParseError(err)
-	msg := err.Error()
+	msg := "Failed to process request"
 	statusCode, ok := errorStatusMap[err]
 	if !ok {
 		statusCode = http.StatusInternalServerError
