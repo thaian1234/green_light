@@ -17,6 +17,7 @@ type (
 		HTTP    *HTTP
 		Logger  *Logger
 		Limiter *Limiter
+		Smtp    *SMTP
 	}
 	// App contains all the environment variables for the application
 	App struct {
@@ -63,6 +64,14 @@ type (
 		Rps     int
 		Burst   int
 		Enabled bool
+	}
+	// Mailer configuration
+	SMTP struct {
+		Host     string
+		Port     int
+		Username string
+		Password string
+		Sender   string
 	}
 )
 
@@ -129,6 +138,15 @@ func Load() (*Config, error) {
 		Enabled: enabled,
 	}
 
+	smtpPort, _ := strconv.Atoi(os.Getenv("SMTP_PORT"))
+	smtp := &SMTP{
+		Host:     os.Getenv("SMTP_HOST"),
+		Port:     smtpPort,
+		Username: os.Getenv("SMTP_USERNAME"),
+		Password: os.Getenv("SMTP_PASSWORD"),
+		Sender:   os.Getenv("SMTP_SENDER"),
+	}
+
 	return &Config{
 		app,
 		token,
@@ -137,5 +155,6 @@ func Load() (*Config, error) {
 		http,
 		logger,
 		limiter,
+		smtp,
 	}, nil
 }

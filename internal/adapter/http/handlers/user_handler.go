@@ -7,12 +7,14 @@ import (
 )
 
 type UserHandler struct {
-	userService ports.UserService
+	userService   ports.UserService
+	mailerService ports.MailerService
 }
 
-func NewUserHandler(userService ports.UserService) *UserHandler {
+func NewUserHandler(userService ports.UserService, mailService ports.MailerService) *UserHandler {
 	return &UserHandler{
-		userService: userService,
+		userService:   userService,
+		mailerService: mailService,
 	}
 }
 
@@ -45,6 +47,11 @@ func (h *UserHandler) RegisterUser(ctx *gin.Context) {
 		return
 	}
 	if err = h.userService.CreateUser(ctx, user); err != nil {
+		HandleError(ctx, err)
+		return
+	}
+	err = h.mailerService.Send(user.Email, "user_welcome.tmpl", user)
+	if err != nil {
 		HandleError(ctx, err)
 		return
 	}

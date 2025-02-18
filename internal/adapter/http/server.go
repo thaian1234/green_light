@@ -45,11 +45,12 @@ func NewAdapter(cfg *config.Config, db *postgres.Adapter) *Adapter {
 	healthSvc := services.NewHealthService(cfg)
 	movieSvc := services.NewMovieService(movieRepo)
 	userSvc := services.NewUserService(userRepo)
+	mailerSvc := services.NewMailerService(cfg.Smtp)
 
 	// Handlers
 	healthHandler := handlers.NewHealthHandler(healthSvc)
 	movieHandler := handlers.NewMovieHandler(movieSvc)
-	userHandler := handlers.NewUserHandler(userSvc)
+	userHandler := handlers.NewUserHandler(userSvc, mailerSvc)
 
 	// Routes
 	_, err := NewRoutes(
