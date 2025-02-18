@@ -19,7 +19,6 @@ type Adapter struct {
 }
 
 func NewAdapter(cfg *config.Logger) (*Adapter, error) {
-
 	writerSyncer := getLogWritter(cfg)
 	encoder := getEncoder()
 

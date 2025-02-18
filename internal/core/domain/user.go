@@ -76,14 +76,15 @@ func (u *User) ValidatePasswordPlaintext(password string) error {
 }
 
 func (u *User) ValidateUser() error {
+	var err error
 	if u.Name == "" {
-		return errors.New("name must be provided")
+		err = errors.New("name must be provided")
+		return err
 	}
 	if u.Email == "" {
-		return errors.New("email must be provided")
+		err = errors.New("email must be provided")
+		return err
 	}
-	if u.Password.Plaintext == nil {
-		return errors.New("password must be provided")
-	}
-	return nil
+	err = u.ValidatePasswordPlaintext(*u.Password.Plaintext)
+	return err
 }

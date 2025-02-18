@@ -33,7 +33,7 @@ func NewRoutes(
 
 	r.Use(cors.New(ginConfig))
 	r.NoRoute(gin.HandlerFunc(func(c *gin.Context) {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Not found"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "API Not found"})
 	}))
 	r.NoMethod(gin.HandlerFunc(func(c *gin.Context) {
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"message": "Method not allowed"})
@@ -58,7 +58,7 @@ func NewRoutes(
 		// User route
 		user := v1.Group("/users")
 		{
-			user.POST("/register", userHandler.RegisterUser)
+			user.POST("/", userHandler.RegisterUser)
 		}
 	}
 
